@@ -43,7 +43,7 @@ To run this project on your local machine, ensure you have the following install
 First, clone the repository to your local machine using git.
 
 ```bash
-git clone https://github.com/your-username/ai_adbuster_extension.git
+git clone https://github.com/PrafullRaj/AdBuster.git
 cd ai_adbuster_extension
 ```
 
