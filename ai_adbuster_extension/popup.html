@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI AdBuster</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 220px;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        .button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .button.active {
+            background-color: #e74c3c;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h2>AI AdBuster</h2>
+    <button id="normal-mode" class="button active">Normal Mode</button>
+    <button id="replace-ads" class="button">Replace Ads Mode</button>
+    <button id="vampire-mode" class="button">Vampire Mode</button>
+    <button id="exorcism-mode" class="button">Exorcism Mode</button>
+
+    <script>
+        const buttons = document.querySelectorAll('.button');
+
+        // Function to remove all ads and reset the page to Normal Mode
+        function resetPage() {
+            const ads = document.querySelectorAll('[class*="ad"], [id*="ad"], iframe, .sponsored');
+            ads.forEach(ad => {
+                ad.style.filter = '';  // Remove any grayscale filter
+                ad.style.display = '';  // Make sure ads are displayed again if removed
+                ad.style.visibility = '';  // Restore visibility if changed
+            });
+        }
+
+        function deactivateAllButtons() {
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+        }
+
+        document.getElementById('normal-mode').addEventListener('click', function () {
+            deactivateAllButtons();
+            this.classList.add('active');
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: resetPage  // Reset the page to normal state
+                });
+            });
+        });
+
+        document.getElementById('replace-ads').addEventListener('click', function () {
+            deactivateAllButtons();
+            this.classList.add('active');
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: replaceAdsMode  // Execute Replace Ads Mode
+                });
+            });
+        });
+
+        document.getElementById('vampire-mode').addEventListener('click', function () {
+            deactivateAllButtons();
+            this.classList.add('active');
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: vampireMode  // Execute Vampire Mode
+                });
+            });
+        });
+
+        document.getElementById('exorcism-mode').addEventListener('click', function () {
+            deactivateAllButtons();
+            this.classList.add('active');
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    function: exorcismMode  // Execute Exorcism Mode
+                });
+            });
+        });
+
+        // Replace Ads Mode: Replace ad content with AI-generated descriptions
+        function replaceAdsMode() {
+    const ads = document.querySelectorAll('[class*="ad"], [id*="ad"], iframe, .sponsored');
+    ads.forEach((ad) => {
+        const adText = ad.innerText || ad.alt || "ad content";  // Fallback text
+        fetch('https://ai-adbuster-server.onrender.com/generate', {  // Use Render URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: adText }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            return response.json();  // Parse the JSON response
+        })
+        .then(data => {
+            if (data.description) {
+                const newAd = document.createElement('div');
+                newAd.innerText = data.description;
+                newAd.style.fontStyle = 'italic';
+                newAd.style.backgroundColor = '#f9f9f9';  // Light background
+                newAd.style.padding = '10px';  // Padding for better visibility
+                newAd.style.border = '1px solid #ccc';  // Border to make it look better
+                ad.replaceWith(newAd);  // Replace the old ad with the new content
+                console.log('Ad replaced with AI-generated description.');
+            } else {
+                console.error('No description returned from the AI server.');
+            }
+        })
+        .catch(error => {
+            console.error('Error replacing ad:', error);  // Log any errors
+        });
+    });
+}
+
+
+        // Vampire Mode: Turn ads grayscale
+        function vampireMode() {
+            const ads = document.querySelectorAll('[class*="ad"], [id*="ad"], iframe, .sponsored');
+            ads.forEach(ad => {
+                ad.style.filter = 'grayscale(100%)';  // Apply grayscale
+            });
+        }
+
+        // Exorcism Mode: Remove ads from the webpage
+        function exorcismMode() {
+            const ads = document.querySelectorAll('[class*="ad"], [id*="ad"], iframe, .sponsored');
+            ads.forEach(ad => {
+                ad.style.visibility = 'hidden';  // Hide ads instead of removing them
+            });
+        }
+    </script>
+</body>
+</html>
